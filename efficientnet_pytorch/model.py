@@ -11,6 +11,7 @@ from .utils import (
     get_model_params,
     efficientnet_params,
     load_pretrained_weights,
+    zerocenter
 )
 
 class MBConvBlock(nn.Module):
@@ -73,7 +74,9 @@ class MBConvBlock(nn.Module):
         x = inputs
         if self._block_args.expand_ratio != 1:
             x = relu_fn(self._bn0(self._expand_conv(inputs)))
+            x = zerocenter(x)
         x = relu_fn(self._bn1(self._depthwise_conv(x)))
+        x = zerocenter(x)
 
         # Squeeze and Excitation
         if self.has_se:
@@ -82,6 +85,7 @@ class MBConvBlock(nn.Module):
             x = torch.sigmoid(x_squeezed) * x
 
         x = self._bn2(self._project_conv(x))
+        x = zerocenter(x)
 
         # Skip connection and drop connect
         input_filters, output_filters = self._block_args.input_filters, self._block_args.output_filters
@@ -159,6 +163,7 @@ class EfficientNet(nn.Module):
 
         # Stem
         x = relu_fn(self._bn0(self._conv_stem(inputs)))
+        x = zerocenter(x)
 
         # Blocks
         for idx, block in enumerate(self._blocks):
@@ -169,6 +174,7 @@ class EfficientNet(nn.Module):
 
         # Head
         x = relu_fn(self._bn1(self._conv_head(x)))
+        x = zerocenter(x)
 
         return x
 

@@ -12,6 +12,10 @@ from torch import nn
 from torch.nn import functional as F
 from torch.utils import model_zoo
 
+def zerocenter(x):
+    """x : [B, C, H, W]"""
+    return x - x.flatten(1).mean(1, keepdim=True).unsqueeze(-1).unsqueeze(-1)
+
 ########################################################################
 ############### HELPERS FUNCTIONS FOR MODEL ARCHITECTURE ###############
 ########################################################################
